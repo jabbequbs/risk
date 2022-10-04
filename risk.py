@@ -122,6 +122,10 @@ class RiskWindow(pyglet.window.Window):
     def __init__(self):
         self.ui_batch = []
         self.player_colors = ["8b0000", "006400", "00008b", "008b8b", "ff8c00", "8b008b", "bdb76b", "2f4f4f"]
+        # vertex_list = batch.add(2, pyglet.gl.GL_POINTS, None,
+        #     ('v2i', (10, 15, 30, 35)),
+        #     ('c3B', (0, 0, 255, 0, 255, 0))
+        # )
         for idx, color in enumerate(self.player_colors):
             button_width = 80
             button_height = 40
@@ -144,6 +148,7 @@ class RiskWindow(pyglet.window.Window):
         self.screen_height = 3
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180
         # self.maximize()
+        self.set_icon(pyglet.image.load("icon_16.png"), pyglet.image.load("icon_32.png"))
         # super().__init__ already created the window/OpenGL context, so init here
         glPointSize(2)
         glColor3f(1, 1, 1)

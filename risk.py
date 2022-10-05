@@ -24,6 +24,13 @@ def clamp(x, minVal, maxVal):
     else:
         return x
 
+def wrap(x, minVal, maxVal):
+    if x < minVal:
+        x += maxVal - minVal
+    elif x > maxVal:
+        x -= maxVal - minVal
+    return x
+
 def normalized(vertices):
     if len(vertices) % 3 != 0:
         raise ArgumentError("len(vertices) must be a multiple of three (3)")
@@ -39,8 +46,8 @@ def texcoords(vertices):
     result = []
     for i in range(0, len(vertices), 3):
         x, y, z = vertices[i:i+3]
-        s = clamp((atan2(x, z) + pi)/(2*pi), 0, 1)
-        t = clamp((asin(y) + pi/2)/pi, 0, 1)
+        s = wrap((atan2(x, z) + pi)/(2*pi), 0, 1)
+        t = wrap((asin(y) + pi/2)/pi, 0, 1)
         result.extend((s, t))
     return result
 
@@ -78,8 +85,8 @@ def get_vertices(radius):
                 len(strip)//3,
                 ("v3f", strip),
                 # ("c4B", color*(len(strip)//3))
-                ("c4B", colors)
-                # ("t2f", texcoords(strip))
+                # ("c4B", colors)
+                ("t2f", texcoords(strip))
                 ))
             # TODO: fix the texture coords around the international date line
     return result
@@ -122,7 +129,8 @@ class RiskWindow(pyglet.window.Window):
     def __init__(self):
         super().__init__(1280, 720, caption="Risk", resizable=True)
         self.ui_batch = pyglet.graphics.Batch()
-        self.player_colors = ["8b0000", "006400", "00008b", "008b8b", "ff8c00", "8b008b", "bdb76b", "2f4f4f"]
+        self.player_colors = ["8b0000", "006400", "f0ffff", "ff8c00", "8b008b", "2f4f4f", "ff00ff",
+            "00008b", "00bfff", "008b8b"]
         button_width = 100
         button_height = 80
         button_spacing = 20
@@ -187,20 +195,11 @@ class RiskWindow(pyglet.window.Window):
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        self.rotation += dx/self.rotation_factor
-        self.tilt -= dy/self.rotation_factor
-        tilt_max = 80
-        if self.tilt > tilt_max:
-            self.tilt = tilt_max
-        elif self.tilt < -tilt_max:
-            self.tilt = -tilt_max
+        self.rotation = wrap(self.rotation + dx/self.rotation_factor, 0, 360)
+        self.tilt = clamp(self.tilt - dy/self.rotation_factor, -80, 80)
 
     def on_mouse_scroll(self, x, y, dx, dy):
-        self.screen_height *= pow(2, -dy)
-        if self.screen_height > 3:
-            self.screen_height = 3
-        elif self.screen_height < 3*pow(2, -4):
-            self.screen_height = 3*pow(2, -4)
+        self.screen_height = clamp(self.screen_height * pow(2, -dy), 3*pow(2, -4), 3)
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180
 
 

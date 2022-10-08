@@ -124,6 +124,26 @@ def from_hex(color):
         raise ArgumentError("hex color must be 6 characters long")
     return tuple(int(color[i:i+2], base=16) for i in range(0, len(color), 2))
 
+class Menu:
+    def __init__(self):
+        self.batches = {}
+        self.batches["main"] = self.get_main_batch()
+        self.state = "main"
+
+    def draw(self):
+        self.batches[self.state].draw()
+
+    def click(self, x, y):
+        pass
+
+    def get_main_batch(self):
+        width, height = 400, 400
+        result = pyglet.graphics.Batch()
+        result.add(4, GL_TRIANGLE_STRIP, pyglet.graphics.Group(),
+            ("v2i", (0, 0, 0, -height, width, 0, width, -height)),
+            ("c4B", (255, 0, 0, 128)*4))
+        return result
+
 
 class RiskWindow(pyglet.window.Window):
     def __init__(self):
@@ -147,10 +167,11 @@ class RiskWindow(pyglet.window.Window):
         self.texture = pyglet.image.load('2k_earth_daymap.jpg').get_texture()
         self.sphere_height = 2
         self.vertices = get_vertices_old(self.sphere_height/2)
-        self.tilt = 0
+        self.tilt = 20
         self.rotation = 0
         self.screen_height = 3
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180
+        self.menu = Menu()
         # self.maximize()
         self.set_icon(pyglet.image.load("icon_16.png"), pyglet.image.load("icon_32.png"))
         glPointSize(2)
@@ -160,6 +181,8 @@ class RiskWindow(pyglet.window.Window):
         glViewport(0, 0, self.width, self.height)
         glEnable(GL_DEPTH_TEST)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        # glEnable(GL_BLEND)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         ratio = self.width / self.height * self.screen_height / 2.0
@@ -182,14 +205,17 @@ class RiskWindow(pyglet.window.Window):
         glOrtho(0, self.width, 0, self.height, -1, 1)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+        glPushMatrix()
         glTranslatef(20, self.height-20-80, 0)
         self.ui_batch.draw()
         self.fpsDisplay.draw()
         self.label.draw()
+        glPopMatrix()
+        glTranslatef(self.width/2, self.height/2, 0)
+        self.menu.draw()
 
     def update(self, dt):
-        # print(dt)
-        pass
+        self.rotation += dt / 24 * 360
 
     def on_resize(self, width, height):
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180
@@ -205,5 +231,5 @@ class RiskWindow(pyglet.window.Window):
 
 if __name__ == '__main__':
     window = RiskWindow()
-    # pyglet.clock.schedule_interval(window.update, 1/30.0)
+    pyglet.clock.schedule_interval(window.update, 1/30.0)
     pyglet.app.run()

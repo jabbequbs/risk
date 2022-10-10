@@ -149,19 +149,24 @@ class RiskWindow(pyglet.window.Window):
     def __init__(self):
         super().__init__(1280, 720, caption="Risk", resizable=True)
         self.ui_batch = pyglet.graphics.Batch()
-        self.player_colors = ["8b0000", "006400", "f0ffff", "ff8c00", "8b008b", "2f4f4f", "ff00ff",
-            "00008b", "00bfff", "008b8b"]
-        button_width = 100
-        button_height = 80
-        button_spacing = 20
-        for idx, color in enumerate(self.player_colors):
-            vertices = ("v2i", (
-                (idx*button_width)+(idx*button_spacing), 0,
-                (idx*button_width)+(idx*button_spacing), button_height,
-                (idx*button_width)+(idx*button_spacing)+button_width, 0,
-                (idx*button_width)+(idx*button_spacing)+button_width, button_height,))
-            colors = ("c3B", from_hex(color)*4)
-            self.ui_batch.add(4, GL_TRIANGLE_STRIP, pyglet.graphics.Group(), vertices, colors)
+        self.player_colors = [
+            ["ff0000", "00ff00", "0000ff", "4b0082", "00ffff", "ff00ff", "ffff00", "808080", "ffffff",],
+            ["dc143c", "228b22", "1e90ff", "ff69b4", "ff8c00", "ffff00", "4b0082", "808080", "f8f8ff",],
+            ["8b008b", "2f4f4f", "ff00ff",],
+            ["00008b", "00bfff", "008b8b",],
+            ]
+        button_width = 30
+        button_height = 20
+        button_spacing = 10
+        for rowIdx, row in enumerate(self.player_colors):
+            for idx, color in enumerate(row):
+                vertices = ("v2i", (
+                    (idx*button_width)+(idx*button_spacing), -rowIdx*(button_height+button_spacing),
+                    (idx*button_width)+(idx*button_spacing), -rowIdx*(button_height+button_spacing)-button_height,
+                    (idx*button_width)+(idx*button_spacing)+button_width, -rowIdx*(button_height+button_spacing),
+                    (idx*button_width)+(idx*button_spacing)+button_width, -rowIdx*(button_height+button_spacing)-button_height,))
+                colors = ("c3B", from_hex(color)*4)
+                self.ui_batch.add(4, GL_TRIANGLE_STRIP, pyglet.graphics.Group(), vertices, colors)
         self.label = pyglet.text.Label("Hello, world", font_name="Times New Roman", font_size=36, x=0, y=0, color=(255, 255, 255, 255))
         self.fpsDisplay = pyglet.window.FPSDisplay(self)
         self.texture = pyglet.image.load('2k_earth_daymap.jpg').get_texture()
@@ -206,10 +211,10 @@ class RiskWindow(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glPushMatrix()
-        glTranslatef(20, self.height-20-80, 0)
+        glTranslatef(0, self.height, 0)
         self.ui_batch.draw()
         self.fpsDisplay.draw()
-        self.label.draw()
+        # self.label.draw()
         glPopMatrix()
         glTranslatef(self.width/2, self.height/2, 0)
         self.menu.draw()

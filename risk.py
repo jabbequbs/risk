@@ -6,7 +6,13 @@ Textures from https://www.solarsystemscope.com/textures/
 Ideas from https://www.youtube.com/watch?v=sLqXFF8mlEU&t=972s
 """
 
-from pyglet.gl import *
+try:
+    from pyglet.gl import *
+except ImportError:
+    import subprocess
+    import sys
+    py = "venv\\Scripts\\python.exe"
+    sys.exit(subprocess.Popen([py] + sys.argv).wait())
 from math import *
 
 
@@ -170,6 +176,7 @@ class RiskWindow(pyglet.window.Window):
         self.label = pyglet.text.Label("Hello, world", font_name="Times New Roman", font_size=36, x=0, y=0, color=(255, 255, 255, 255))
         self.fpsDisplay = pyglet.window.FPSDisplay(self)
         self.texture = pyglet.image.load('2k_earth_daymap.jpg').get_texture()
+        # self.texture = pyglet.image.load('map.png').get_texture()
         self.sphere_height = 2
         self.vertices = get_vertices_old(self.sphere_height/2)
         self.tilt = 20
@@ -204,6 +211,7 @@ class RiskWindow(pyglet.window.Window):
             v.draw(GL_TRIANGLE_STRIP)
 
         # Draw UI stuff (overtop of the globe)
+        glDisable(GL_TEXTURE_2D)
         glDisable(GL_DEPTH_TEST)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -217,10 +225,11 @@ class RiskWindow(pyglet.window.Window):
         # self.label.draw()
         glPopMatrix()
         glTranslatef(self.width/2, self.height/2, 0)
-        self.menu.draw()
+        # self.menu.draw()
 
     def update(self, dt):
-        self.rotation += dt / 24 * 360
+        # self.rotation += dt / 24 * 360
+        pass
 
     def on_resize(self, width, height):
         self.rotation_factor = self.sphere_height / self.screen_height * self.height / 180

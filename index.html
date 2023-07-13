@@ -5,17 +5,29 @@
   <style type="text/css">
     * { box-sizing: border-box; font-family: Verdana, sans-serif; font-size: 14px; }
     html, body { height: 100%; margin: 0; }
+    .footer { position: fixed; left: 0; bottom: 0; width: 100%; padding: 10px; }
+    .player + .player { margin-top: 10px; }
+    .messages { border-top: 3px solid skyblue; padding: 10px; overflow: auto; }
   </style>
 </head>
 <body>
   <div style="width:360px; position: fixed; overflow: auto; border-right: 3px solid skyblue; height: 100%; padding: 10px;">
-    <div><input type="text" v-model="tableFilterText" placeholder="Filter Tables" style="width:100%;" class="filterText"></div>
-    <div v-if="allTables.length > 0">
-      <div v-for="tableName in filteredTables" v-on:click="addTable(tableName)" style="padding:2px 0px;cursor:pointer;">{{tableName}}</div>
+    <div>
+      <input type="text" v-model="filterText" placeholder="Filter Countries" style="width:100%;" class="filterText">
+    </div>
+    <div class="countryList">
+      <!-- <div style="padding:2px 0px;cursor:pointer;">{{countryName}}</div> -->
+    </div>
+    <div class="footer" style="width: 360px; border-top: 3px solid skyblue; border-right: 3px solid skyblue; background-color: white;">
+      <div class="player"><div style="float:left;">Wendell</div><div style="float:right;width:180px;background-color:red;">&nbsp;</div><div style="clear:both;"></div></div>
+      <div class="player"><div style="float:left;">Nick</div><div style="float:right;width:180px;background-color:blue;">&nbsp;</div><div style="clear:both;"></div></div>
+      <div class="player"><div style="float:left;">Darren</div><div style="float:right;width:180px;background-color:green;">&nbsp;</div><div style="clear:both;"></div></div>
+      <div class="player"><div style="float:left;">Aaron</div><div style="float:right;width:180px;background-color:yellow;">&nbsp;</div><div style="clear:both;"></div></div>
+      <div class="player"><div style="float:left;">Ben</div><div style="float:right;width:180px;background-color:black;">&nbsp;</div><div style="clear:both;"></div></div>
     </div>
   </div>
-  <div style="margin-left: 360px; padding: 10px;">
-    <canvas width="800" height="800" style="border:3px solid skyblue;"></canvas>
+  <div style="margin-left: 360px; padding: 0px;">
+    <canvas width="800" height="800" style="margin: 0px auto; display: block;"></canvas>
     <div class="messages"></div>
   </div>
 
@@ -29,6 +41,14 @@
     const land = topojson.feature(world, world.objects.land);
     const borders = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
     const countries = topojson.feature(world, world.objects.countries).features;
+    const countryNames = countries.map(c => c.properties.name).sort();
+    for (const countryIdx in countryNames){
+      let div = document.createElement("div");
+      div.textContent = countryNames[countryIdx];
+      div.style.padding = "2px 0px";
+      div.style.cursor = "pointer";
+      document.querySelector(".countryList").appendChild(div);
+    }
     const sphere = ({type: "Sphere"});
     const tilt = 20;
     const width = canvas.width;
@@ -95,7 +115,7 @@
     const projection = d3.geoOrthographic().fitExtent([[10, 10], [width - 10, height - 10]], sphere);
     const path = d3.geoPath(projection, context);
 
-    function render(country, arc) {
+    const render = (country, arc) => {
       context.clearRect(0, 0, width, height);
       context.beginPath(), path(land), context.fillStyle = "#ccc", context.fill();
       context.beginPath(), path(country), context.fillStyle = "#f00", context.fill();
@@ -133,6 +153,7 @@
             render(country, {type: "LineString", coordinates: [ip(t), p2]});
           }) // as above, assign a named function for every frame of the transition
           .end(); // return a promise that will resolve when the transition is complete
+      break;
     }
   }
   main();
